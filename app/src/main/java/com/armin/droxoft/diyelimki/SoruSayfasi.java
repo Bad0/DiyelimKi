@@ -79,6 +79,7 @@ public class SoruSayfasi extends Activity {
                         StatButton.startAnimation(ButtonAnim_in);
                         ShareButton.startAnimation(ButtonAnim_in);
 
+
                     }
                 }, 800);
 
