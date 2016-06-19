@@ -10,17 +10,37 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 
 public class SoruSayfasi extends Activity {
+
+    TextView textviewwhatif, textviewresult;
+    int hangisorudasin;
 
     protected void onCreate(Bundle bundle){
         super.onCreate(bundle);
         setContentView(R.layout.sorusayfasi);
         tanimlar();
+        hangisorudasin = 1;
+        soruyugetir(hangisorudasin);
+    }
+
+    private void soruyugetir(int hangisorudasin) {
+        DatabaseClassSorular dCS = new DatabaseClassSorular(this);
+        dCS.open();
+        int soruid = Integer.valueOf(dCS.soruidcek(hangisorudasin));
+        String whatif = dCS.whatifcek(hangisorudasin);
+        String result = dCS.resultcek(hangisorudasin);
+        int yes = Integer.valueOf(dCS.yescek(hangisorudasin));
+        int no = Integer.valueOf(dCS.nocek(hangisorudasin));
+        textviewwhatif.setText(whatif);
+        textviewresult.setText(result);
     }
 
     private void tanimlar() {
+        textviewwhatif = (TextView) findViewById(R.id.textView2);
+        textviewresult = (TextView) findViewById(R.id.textView4);
         ImageButton homebutton = (ImageButton) findViewById(R.id.imageButton);
         homebutton.setOnClickListener(new View.OnClickListener() {
             @Override
