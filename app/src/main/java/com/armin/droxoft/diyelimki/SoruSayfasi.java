@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -32,8 +31,7 @@ public class SoruSayfasi extends Activity {
         int soruid = Integer.valueOf(dCS.soruidcek(hangisorudasin));
         String whatif = dCS.whatifcek(hangisorudasin);
         String result = dCS.resultcek(hangisorudasin);
-        int yes = Integer.valueOf(dCS.yescek(hangisorudasin));
-        int no = Integer.valueOf(dCS.nocek(hangisorudasin));
+        dCS.close();
         textviewwhatif.setText(whatif);
         textviewresult.setText(result);
     }
@@ -43,7 +41,6 @@ public class SoruSayfasi extends Activity {
         textviewresult = (TextView) findViewById(R.id.textView4);
         ImageButton homebutton = (ImageButton) findViewById(R.id.imageButton);
         homebutton.setOnClickListener(new View.OnClickListener() {
-            @Override
             public void onClick(View v) {
                 Intent i = new Intent(SoruSayfasi.this,Home.class);
                 startActivity(i);
@@ -58,18 +55,25 @@ public class SoruSayfasi extends Activity {
         final RelativeLayout LayStat = (RelativeLayout) findViewById(R.id.layIstatistik);
         final ImageButton evetButton = (ImageButton) findViewById(R.id.bEvet);
         final ImageButton hayirButton = (ImageButton) findViewById(R.id.bHayir);
-        final ImageButton StatButton = (ImageButton) findViewById(R.id.bEvet2);
-        final ImageButton ShareButton = (ImageButton) findViewById(R.id.bHayir2);
+        final RelativeLayout StatButton = (RelativeLayout) findViewById(R.id.bEvet2);
+        final RelativeLayout ShareButton = (RelativeLayout) findViewById(R.id.bHayir2);
+        final TextView textviewistatistik = (TextView) findViewById(R.id.textView);
         evetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("tago", "bevet");
                 evetButton.startAnimation(ButtonAnim_out);
                 hayirButton.startAnimation(ButtonAnim_out_late);
-                Handler handler = new Handler();
+                final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        DatabaseClassSorular sss = new DatabaseClassSorular(SoruSayfasi.this);
+                        sss.open();
+                        int yes = Integer.valueOf(sss.yescek(hangisorudasin));
+                        int no = Integer.valueOf(sss.nocek(hangisorudasin));
+                        sss.close();
+                        int dogrulukyuzdesi = (100*yes)/(yes + no+1);
+                        textviewistatistik.setText(String.valueOf(dogrulukyuzdesi));
                         LayEvetHayir.setVisibility(View.INVISIBLE);
                         LayStat.setVisibility(View.VISIBLE);
                         StatButton.startAnimation(ButtonAnim_in);
@@ -78,22 +82,25 @@ public class SoruSayfasi extends Activity {
                     }
                 }, 800);
 
-
-
-
             }
         });
 
         hayirButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("tago", "bhayir");
                 hayirButton.startAnimation(ButtonAnim_out);
                 evetButton.startAnimation(ButtonAnim_out_late);
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        DatabaseClassSorular sss = new DatabaseClassSorular(SoruSayfasi.this);
+                        sss.open();
+                        int yes = Integer.valueOf(sss.yescek(hangisorudasin));
+                        int no = Integer.valueOf(sss.nocek(hangisorudasin));
+                        sss.close();
+                        int dogrulukyuzdesi = (100*yes)/(yes + no+ 1);
+                        textviewistatistik.setText(String.valueOf(dogrulukyuzdesi));
                         LayEvetHayir.setVisibility(View.INVISIBLE);
                         LayStat.setVisibility(View.VISIBLE);
                         StatButton.startAnimation(ButtonAnim_in);
@@ -113,6 +120,14 @@ public class SoruSayfasi extends Activity {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        hangisorudasin++;
+                        DatabaseClassSorular aaa = new DatabaseClassSorular(SoruSayfasi.this);
+                        aaa.open();
+                        String whatif = aaa.whatifcek(hangisorudasin);
+                        String  result = aaa.resultcek(hangisorudasin);
+                        aaa.close();
+                        textviewwhatif.setText(whatif);
+                        textviewresult.setText(result);
                         LayStat.setVisibility(View.INVISIBLE);
                         LayEvetHayir.setVisibility(View.VISIBLE);
                         evetButton.startAnimation(ButtonAnim_in);
