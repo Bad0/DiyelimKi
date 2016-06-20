@@ -64,7 +64,7 @@ public class Home extends Activity {
         TabHost.TabSpec tspec1, tspec2, tspec3;
         thost.setup();
         tspec1 = thost.newTabSpec("Kategori");
-        Drawable d = ContextCompat.getDrawable(this,R.mipmap.ne_dersin);
+        Drawable d = ContextCompat.getDrawable(this,R.mipmap.kategori);
         tspec1.setIndicator("" , d);
         tspec1.setContent(R.id.tab1);
         thost.addTab(tspec1);
