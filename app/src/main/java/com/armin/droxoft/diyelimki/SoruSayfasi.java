@@ -1,7 +1,10 @@
 package com.armin.droxoft.diyelimki;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -11,16 +14,30 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
 
 public class SoruSayfasi extends Activity {
 
     TextView textviewwhatif, textviewresult;
     int hangisorudasin;
-
+    String userid;
+    private String sharedPrefUserIdAl(){
+        SharedPreferences sP = getSharedPreferences("kullaniciverileri" , Context.MODE_PRIVATE);
+        return sP.getString("userid" , "defaultuserid");
+    }
     protected void onCreate(Bundle bundle){
         super.onCreate(bundle);
         setContentView(R.layout.sorusayfasi);
         tanimlar();
+        userid = sharedPrefUserIdAl();
         hangisorudasin = 1;
         soruyugetir(hangisorudasin);
     }
@@ -71,15 +88,20 @@ public class SoruSayfasi extends Activity {
                         sss.open();
                         int yes = Integer.valueOf(sss.yescek(hangisorudasin));
                         int no = Integer.valueOf(sss.nocek(hangisorudasin));
+                        String soruid = sss.soruidcek(hangisorudasin);
                         sss.close();
                         int dogrulukyuzdesi = (100*yes)/(yes + no+1);
+                        String status = "0";
+                        if(dogrulukyuzdesi>50){
+                            status = "1";
+                        }
                         textviewistatistik.setText(String.valueOf(dogrulukyuzdesi));
+                        ServerEvetCevapGonder sECG = new ServerEvetCevapGonder(soruid,userid,status);
+                        sECG.execute();
                         LayEvetHayir.setVisibility(View.INVISIBLE);
                         LayStat.setVisibility(View.VISIBLE);
                         StatButton.startAnimation(ButtonAnim_in);
                         ShareButton.startAnimation(ButtonAnim_in);
-
-
                     }
                 }, 800);
 
@@ -99,9 +121,16 @@ public class SoruSayfasi extends Activity {
                         sss.open();
                         int yes = Integer.valueOf(sss.yescek(hangisorudasin));
                         int no = Integer.valueOf(sss.nocek(hangisorudasin));
+                        String soruid = sss.soruidcek(hangisorudasin);
                         sss.close();
                         int dogrulukyuzdesi = (100*yes)/(yes + no+ 1);
+                        String status = "0";
+                        if(dogrulukyuzdesi<50){
+                            status = "1";
+                        }
                         textviewistatistik.setText(String.valueOf(dogrulukyuzdesi));
+                        ServerHayirCevapGonder sHCG = new ServerHayirCevapGonder(soruid,userid,status);
+                        sHCG.execute();
                         LayEvetHayir.setVisibility(View.INVISIBLE);
                         LayStat.setVisibility(View.VISIBLE);
                         StatButton.startAnimation(ButtonAnim_in);
@@ -156,5 +185,92 @@ public class SoruSayfasi extends Activity {
                 }, 800);
             }
         });
+    }
+
+
+    private class ServerEvetCevapGonder extends AsyncTask<String, Void, String>{
+
+        String soruid, userid , status;
+        String query;
+        String charset;
+        public ServerEvetCevapGonder(String soruid , String userid , String status ){
+            this.soruid = soruid;
+            this.userid = userid;
+            this.status = status;
+            String param1 = "whatif";
+            String param2 = "result";
+            String param3 = "kategori";
+            charset = "UTF-8";
+            try {
+                query = String.format("param1=%s&param2=%s&param3=%s", URLEncoder.encode(param1, charset),
+                        URLEncoder.encode(param2, charset), URLEncoder.encode(param3, charset));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+
+        protected String doInBackground(String... params) {
+            URLConnection connection = null;
+            try {
+                connection = new URL("http://185.22.187.60/diyelimki/yes.php?id="+soruid+"&userid="+userid+"&status="+ status).openConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Accept-Charset", charset);
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
+            try {
+                OutputStream output = new BufferedOutputStream(connection.getOutputStream());
+                output.write(query.getBytes(charset));
+                output.close();
+                InputStream is = connection.getInputStream();
+            } catch (IOException exception) {
+
+            }
+            return "haha";
+        }
+    }
+
+    private class ServerHayirCevapGonder extends AsyncTask<String,Void,String>{
+
+        String soruid, userid , status;
+        String query;
+        String charset;
+        public ServerHayirCevapGonder(String soruid , String userid , String status ){
+            this.soruid = soruid;
+            this.userid = userid;
+            this.status = status;
+            String param1 = "whatif";
+            String param2 = "result";
+            String param3 = "kategori";
+            charset = "UTF-8";
+            try {
+                query = String.format("param1=%s&param2=%s&param3=%s", URLEncoder.encode(param1, charset),
+                        URLEncoder.encode(param2, charset), URLEncoder.encode(param3, charset));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+
+        protected String doInBackground(String... params) {
+            URLConnection connection = null;
+            try {
+                connection = new URL("http://185.22.187.60/diyelimki/no.php?id="+soruid+"&userid="+userid+"&status="+ status).openConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Accept-Charset", charset);
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
+            try {
+                OutputStream output = new BufferedOutputStream(connection.getOutputStream());
+                output.write(query.getBytes(charset));
+                output.close();
+                InputStream is = connection.getInputStream();
+            } catch (IOException exception) {
+
+            }
+            return "haha";
+        }
     }
 }

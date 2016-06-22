@@ -45,11 +45,25 @@ public class DatabaseClassSorular {
     public long olustur(String soruid, String whatif , String result , String kategori , String yes, String no , String userid){
 
         boolean oncedenvar = false;
+        String varolanid = null;
         List<String> varolanlar = databasedenidcek();
         for(int i = 0 ; i <varolanlar.size() ; i++){
             if(soruid.equals(varolanlar.get(i))){
                 oncedenvar = true;
+                varolanid = varolanlar.get(i);
             }
+        }
+        if(oncedenvar){
+            sqLiteDatabase.delete(TABLENAME,SORUID + "="+ varolanid,null );
+            ContentValues cV = new ContentValues();
+            cV.put(SORUID, soruid);
+            cV.put(WHATIF, whatif);
+            cV.put(RESULT, result);
+            cV.put(KATEGORI, kategori);
+            cV.put(YES, yes);
+            cV.put(NO, no);
+            cV.put(USERID, userid);
+            return sqLiteDatabase.insert(TABLENAME, null, cV);
         }
         if(!oncedenvar) {
             ContentValues cV = new ContentValues();
