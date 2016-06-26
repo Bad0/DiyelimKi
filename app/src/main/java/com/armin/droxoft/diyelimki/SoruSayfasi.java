@@ -45,7 +45,6 @@ public class SoruSayfasi extends Activity {
     private void soruyugetir(int hangisorudasin) {
         DatabaseClassSorular dCS = new DatabaseClassSorular(this);
         dCS.open();
-        int soruid = Integer.valueOf(dCS.soruidcek(hangisorudasin));
         String whatif = dCS.whatifcek(hangisorudasin);
         String result = dCS.resultcek(hangisorudasin);
         dCS.close();

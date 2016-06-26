@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.girissayfasi);
@@ -56,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
         girisanimasyonu();
         boolean ilkgiris = sharedPrefIlkGirisAl();
         if (true) {
+            DatabaseClassSorular dCS = new DatabaseClassSorular(this);
+            dCS.open();
+            dCS.deleteAll();
+            dCS.close();
             sorularidatabaseeyukle();
         }
     }
@@ -82,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sorularidatabaseeyukle() {
-        //Sorulari database e yukleme islemi
         sharedPrefIlkGirisKaydet(false);
         ServerSorulariCek sSC = new ServerSorulariCek();
         sSC.execute("3");
@@ -138,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         protected String doInBackground(String... params) {
-            Log.i("tago", "tago");
             String charset = "UTF-8";
             String query = null;
             String param1 = "kategori";
@@ -160,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
             connection.setRequestProperty("Accept-Charset", charset);
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
             try {
-                Log.i("tago", "inputline ");
                 OutputStream output = new BufferedOutputStream(connection.getOutputStream());
                 output.write(query.getBytes(charset));
                 output.close();

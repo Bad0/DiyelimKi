@@ -5,13 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseClassSorular {
 
-    private static final String DATABASENAME= "Sxflques.db";
+    private static final String DATABASENAME = "Sxflques.db";
     private static final String TABLENAME = "SoruTablosu";
     private static final int DATABASEVERSION = 1;
 
@@ -28,33 +29,34 @@ public class DatabaseClassSorular {
     private static SQLiteDatabase sqLiteDatabase;
 
 
-    public DatabaseClassSorular(Context context){
+    public DatabaseClassSorular(Context context) {
         this.context = context;
     }
 
-    public DatabaseClassSorular open(){
+    public DatabaseClassSorular open() {
         DbHelper dbHelper = new DbHelper(context);
         sqLiteDatabase = dbHelper.getWritableDatabase();
         return this;
     }
 
-    public void close(){
+    public void close() {
         sqLiteDatabase.close();
     }
 
-    public long olustur(String soruid, String whatif , String result , String kategori , String yes, String no , String userid){
+    public long olustur(String soruid, String whatif, String result, String kategori, String yes, String no, String userid) {
 
         boolean oncedenvar = false;
         String varolanid = null;
         List<String> varolanlar = databasedenidcek();
-        for(int i = 0 ; i <varolanlar.size() ; i++){
-            if(soruid.equals(varolanlar.get(i))){
+        for (int i = 0; i < varolanlar.size(); i++) {
+            if (soruid.equals(varolanlar.get(i))) {
                 oncedenvar = true;
                 varolanid = varolanlar.get(i);
             }
         }
-        if(oncedenvar){
-            sqLiteDatabase.delete(TABLENAME,SORUID + "="+ varolanid,null );
+        if (oncedenvar) {
+            Log.i("tago", "oncedenvar");
+            sqLiteDatabase.delete(TABLENAME, SORUID + "=" + varolanid, null);
             ContentValues cV = new ContentValues();
             cV.put(SORUID, soruid);
             cV.put(WHATIF, whatif);
@@ -65,7 +67,7 @@ public class DatabaseClassSorular {
             cV.put(USERID, userid);
             return sqLiteDatabase.insert(TABLENAME, null, cV);
         }
-        if(!oncedenvar) {
+        if (!oncedenvar) {
             ContentValues cV = new ContentValues();
             cV.put(SORUID, soruid);
             cV.put(WHATIF, whatif);
@@ -79,7 +81,15 @@ public class DatabaseClassSorular {
         return 15;
     }
 
-    public List<String> databasedenidcek(){
+    public void deleteAll() {
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLENAME);
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLENAME + "(" + ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                SORUID + " TEXT NOT NULL, " + WHATIF + " TEXT NOT NULL, " + RESULT + " TEXT NOT NULL, "
+                + KATEGORI + " TEXT NOT NULL, " + YES + " TEXT NOT NULL, " + NO + " TEXT NOT NULL, " + USERID + " TEXT NOT NULL);");
+
+    }
+
+    public List<String> databasedenidcek() {
         String[] kolonlar = new String[]{ROWID, SORUID, WHATIF, RESULT, KATEGORI, YES, NO, USERID};
         Cursor c = sqLiteDatabase.query(TABLENAME, kolonlar, null, null, null, null, null);
         List<String> kayitliidler = new ArrayList<>();
@@ -109,6 +119,7 @@ public class DatabaseClassSorular {
         List<String> kayitliwhatifler = new ArrayList<>();
         int whatifindexi = c.getColumnIndex(WHATIF);
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+            Log.i("tago", "c dondu " + c.getString(whatifindexi));
             kayitliwhatifler.add(c.getString(whatifindexi));
         }
         c.close();
@@ -160,8 +171,8 @@ public class DatabaseClassSorular {
 
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE " + TABLENAME + "(" + ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    SORUID +" TEXT NOT NULL, "+ WHATIF + " TEXT NOT NULL, " + RESULT + " TEXT NOT NULL, "
-                    + KATEGORI + " TEXT NOT NULL, " + YES + " TEXT NOT NULL, " + NO + " TEXT NOT NULL, "+USERID+ " TEXT NOT NULL);");
+                    SORUID + " TEXT NOT NULL, " + WHATIF + " TEXT NOT NULL, " + RESULT + " TEXT NOT NULL, "
+                    + KATEGORI + " TEXT NOT NULL, " + YES + " TEXT NOT NULL, " + NO + " TEXT NOT NULL, " + USERID + " TEXT NOT NULL);");
         }
 
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
